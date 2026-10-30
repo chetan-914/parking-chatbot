@@ -1,0 +1,37 @@
+[project]
+name = "parking-chatbot"
+version = "0.1.0"
+description = "CLI parking reservation chatbot with RAG and LangGraph"
+requires-python = ">=3.11"
+dependencies = [
+    "langgraph",
+    "langchain-core",
+    "langchain-openai",
+    "langchain-weaviate",
+    "weaviate-client>=4.5",
+    "psycopg[binary,pool]>=3.1",
+    "pydantic>=2",
+    "presidio-analyzer",
+    "presidio-anonymizer",
+    "spacy",
+    "python-dotenv",
+    "pandas",
+    "matplotlib",
+    "pydantic-settings>=2.16.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["parking_bot"]
