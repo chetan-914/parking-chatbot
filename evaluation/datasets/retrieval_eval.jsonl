@@ -1,0 +1,50 @@
+{"id": "r001", "question": "What is this parking facility and how many spaces does it have?", "relevant_chunk_ids": ["overview"], "topic": "general"}
+{"id": "r002", "question": "Who can use the parking facility?", "relevant_chunk_ids": ["overview"], "topic": "general"}
+{"id": "r003", "question": "Is this a public parking facility?", "relevant_chunk_ids": ["overview"], "topic": "general"}
+{"id": "r004", "question": "Where is the parking entrance?", "relevant_chunk_ids": ["location", "directions_road"], "topic": "location"}
+{"id": "r005", "question": "Can you give me the address and nearby landmarks?", "relevant_chunk_ids": ["location"], "topic": "location"}
+{"id": "r006", "question": "How do I drive into the parking area?", "relevant_chunk_ids": ["directions_road"], "topic": "location"}
+{"id": "r007", "question": "Which road should I take to reach the entrance?", "relevant_chunk_ids": ["directions_road"], "topic": "location"}
+{"id": "r008", "question": "Can I reach the parking by bus or metro?", "relevant_chunk_ids": ["directions_transit"], "topic": "location"}
+{"id": "r009", "question": "What public transport options are nearby?", "relevant_chunk_ids": ["directions_transit"], "topic": "location"}
+{"id": "r010", "question": "How far do I walk from the transit stop?", "relevant_chunk_ids": ["directions_transit"], "topic": "location"}
+{"id": "r011", "question": "How can I reserve a parking space in the chat?", "relevant_chunk_ids": ["how_to_book"], "topic": "booking_process"}
+{"id": "r012", "question": "What information do I need to provide to make a booking?", "relevant_chunk_ids": ["how_to_book"], "topic": "booking_process"}
+{"id": "r013", "question": "Can I book a space for tomorrow?", "relevant_chunk_ids": ["how_to_book"], "topic": "booking_process"}
+{"id": "r014", "question": "Can I cancel a reservation after making it?", "relevant_chunk_ids": ["cancellation_policy"], "topic": "policy"}
+{"id": "r015", "question": "What is the cancellation process?", "relevant_chunk_ids": ["cancellation_policy"], "topic": "policy"}
+{"id": "r016", "question": "Are there any restrictions on when I can cancel?", "relevant_chunk_ids": ["cancellation_policy"], "topic": "policy"}
+{"id": "r017", "question": "Are SUVs or large vehicles allowed?", "relevant_chunk_ids": ["vehicle_rules"], "topic": "rules"}
+{"id": "r018", "question": "Is there a vehicle height restriction?", "relevant_chunk_ids": ["vehicle_rules"], "topic": "rules"}
+{"id": "r019", "question": "What are the driving and speed rules inside the facility?", "relevant_chunk_ids": ["vehicle_rules"], "topic": "rules"}
+{"id": "r020", "question": "Does the parking facility have electric vehicle charging?", "relevant_chunk_ids": ["ev_charging"], "topic": "facilities"}
+{"id": "r021", "question": "How do I use the EV charging points?", "relevant_chunk_ids": ["ev_charging"], "topic": "facilities"}
+{"id": "r022", "question": "Can I charge my electric car while it is parked?", "relevant_chunk_ids": ["ev_charging"], "topic": "facilities"}
+{"id": "r023", "question": "What payment methods are accepted?", "relevant_chunk_ids": ["payment_methods"], "topic": "payment"}
+{"id": "r024", "question": "When do I pay for my parking reservation?", "relevant_chunk_ids": ["payment_methods"], "topic": "payment"}
+{"id": "r025", "question": "Can I pay digitally or by card?", "relevant_chunk_ids": ["payment_methods"], "topic": "payment"}
+{"id": "r026", "question": "Is the parking area monitored by cameras?", "relevant_chunk_ids": ["security"], "topic": "facilities"}
+{"id": "r027", "question": "Is the parking facility well lit and staffed?", "relevant_chunk_ids": ["security"], "topic": "facilities"}
+{"id": "r028", "question": "What security measures are available for parked vehicles?", "relevant_chunk_ids": ["security"], "topic": "facilities"}
+{"id": "r029", "question": "Are accessible parking spaces available?", "relevant_chunk_ids": ["accessibility"], "topic": "facilities"}
+{"id": "r030", "question": "Can a wheelchair user access the parking facility?", "relevant_chunk_ids": ["accessibility"], "topic": "facilities"}
+{"id": "r031", "question": "Are ramps or lifts available?", "relevant_chunk_ids": ["accessibility"], "topic": "facilities"}
+{"id": "r032", "question": "How can I contact a human support representative?", "relevant_chunk_ids": ["contact_support"], "topic": "general"}
+{"id": "r033", "question": "Where can I get help with a reservation problem?", "relevant_chunk_ids": ["contact_support"], "topic": "general"}
+{"id": "r034", "question": "Is there a support phone number or email?", "relevant_chunk_ids": ["contact_support"], "topic": "general"}
+{"id": "r035", "question": "I have an electric car. How do I reserve a space and use charging?", "relevant_chunk_ids": ["how_to_book", "ev_charging"], "topic": "facilities"}
+{"id": "r036", "question": "I need to cancel my booking. What policy applies and how do I contact support?", "relevant_chunk_ids": ["cancellation_policy", "contact_support"], "topic": "policy"}
+{"id": "r037", "question": "How do I find the entrance, and can I get there using public transport?", "relevant_chunk_ids": ["directions_road", "directions_transit"], "topic": "location"}
+{"id": "r038", "question": "Are accessible spaces monitored by security cameras?", "relevant_chunk_ids": ["accessibility", "security"], "topic": "facilities"}
+{"id": "r039", "question": "Can I pay by card, and when is payment collected?", "relevant_chunk_ids": ["payment_methods"], "topic": "payment"}
+{"id": "r040", "question": "What vehicle restrictions should I know before booking?", "relevant_chunk_ids": ["vehicle_rules", "how_to_book"], "topic": "rules"}
+{"id": "r041", "question": "What is the current temperature in Hyderabad?", "relevant_chunk_ids": []}
+{"id": "r042", "question": "Can you book me a flight to Delhi?", "relevant_chunk_ids": []}
+{"id": "r043", "question": "Who won yesterday's cricket match?", "relevant_chunk_ids": []}
+{"id": "r044", "question": "What is the stock price of a technology company?", "relevant_chunk_ids": []}
+{"id": "r045", "question": "Can you recommend a restaurant nearby?", "relevant_chunk_ids": []}
+{"id": "r046", "question": "What is the current exchange rate for USD to INR?", "relevant_chunk_ids": []}
+{"id": "r047", "question": "Can you help me debug a Python program?", "relevant_chunk_ids": []}
+{"id": "r048", "question": "Tell me the latest news about elections.", "relevant_chunk_ids": []}
+{"id": "r049", "question": "What is the weather forecast for next week?", "relevant_chunk_ids": []}
+{"id": "r050", "question": "Can you reserve a hotel room for me?", "relevant_chunk_ids": []}
