@@ -38,7 +38,10 @@ TO agent_role;
 -- 5. ALLOW INSERT INTO REDACTED CONVERSATION LOG
 -- =====================================================
 
-GRANT INSERT ON conversation_log TO agent_role;
+GRANT INSERT ON TABLE conversation_log TO agent_role;
+GRANT UPDATE ON TABLE conversation_log TO agent_role;
+
+GRANT USAGE ON SCHEMA public TO agent_role;
 
 
 -- =====================================================

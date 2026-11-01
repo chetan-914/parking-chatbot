@@ -55,17 +55,43 @@ def main():
                 as_node="human_input",
             )
 
-            # Resume execution until the next human_input interrupt.
-            final_state = None
-
-            for state in graph.stream(
+            # Resume execution and monitor individual node updates.
+            for update in graph.stream(
                 None,
                 config=config,
-                stream_mode="values",
+                stream_mode="updates",
             ):
-                final_state = state
+                if "request_admin_approval" in update:
+                    node_result = update["request_admin_approval"]
 
-            # Display only newly generated assistant messages.
+                    if node_result.get("admin_approval_status") == "PENDING":
+                        print(
+                            "\nBot: Your reservation request has been "
+                            "sent to the administrator."
+                        )
+                        print(
+                            "Waiting for the administrator's approval..."
+                        )
+
+                if "wait_admin_approval" in update:
+                    node_result = update["wait_admin_approval"]
+                    status = node_result.get("admin_approval_status")
+
+                    if status == "APPROVED":
+                        print("\nAdministrator approved your request.")
+
+                    elif status == "REJECTED":
+                        print("\nAdministrator rejected your request.")
+
+                    elif status == "UNCLEAR":
+                        print(
+                            "\nAdministrator approval could not be confirmed."
+                        )
+
+            # Retrieve the latest graph state after execution.
+            final_state = graph.get_state(config).values
+
+            # Display the latest assistant response.
             if final_state:
                 messages = final_state.get("messages", [])
 
@@ -90,8 +116,8 @@ def main():
             print("\n\nChatbot stopped.")
             break
 
-        except Exception as exc:
-            print(f"\nAn error occurred: {exc}")
+        except Exception:
+            print("\nAn error occurred while processing your request.")
             print("Please try again.\n")
 
 

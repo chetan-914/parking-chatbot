@@ -12,12 +12,21 @@ from app.nodes import (
     pii_check_input,
     pii_check_output,
     query_dynamic,
+    request_admin_approval,
     respond,
     retrieve_static,
     save_transcript,
+    wait_admin_approval,
     write_booking,
 )
-from app.routers import route_after_output, route_intent
+
+from app.routers import (
+    route_after_admin_approval,
+    route_after_admin_request,
+    route_after_output,
+    route_intent,
+)
+
 from app.state import ParkingState
 
 
@@ -26,7 +35,7 @@ def build_graph():
 
     builder = StateGraph(ParkingState)
 
-    # Register nodes
+    # Register existing nodes
     builder.add_node("init", init)
     builder.add_node("human_input", human_input)
     builder.add_node("pii_check_input", pii_check_input)
@@ -37,13 +46,24 @@ def build_graph():
 
     builder.add_node("extract_fields", extract_fields)
     builder.add_node("collect_reservation", collect_reservation)
-    builder.add_node("write_booking", write_booking)
 
+    builder.add_node("write_booking", write_booking)
     builder.add_node("farewell", farewell)
     builder.add_node("respond", respond)
 
     builder.add_node("pii_check_output", pii_check_output)
     builder.add_node("save_transcript", save_transcript)
+
+    # New administrator agent workflow nodes
+    builder.add_node(
+        "request_admin_approval",
+        request_admin_approval,
+    )
+
+    builder.add_node(
+        "wait_admin_approval",
+        wait_admin_approval,
+    )
 
     # Main conversation flow
     builder.add_edge(START, "init")
@@ -52,7 +72,7 @@ def build_graph():
     builder.add_edge("human_input", "pii_check_input")
     builder.add_edge("pii_check_input", "classify_intent")
 
-    # Route based on detected intent
+    # Route based on customer intent
     builder.add_conditional_edges(
         "classify_intent",
         route_intent,
@@ -60,18 +80,39 @@ def build_graph():
             "retrieve_static": "retrieve_static",
             "query_dynamic": "query_dynamic",
             "extract_fields": "extract_fields",
-            "write_booking": "write_booking",
+            "request_admin_approval": "request_admin_approval",
             "farewell": "farewell",
         },
     )
 
-    # Individual branches return to the response node.
-    # Keep these as separate edges: list-form edges would wait
-    # for all branches to finish.
+    # Existing retrieval and reservation collection flow
     builder.add_edge("retrieve_static", "respond")
     builder.add_edge("query_dynamic", "respond")
+
     builder.add_edge("extract_fields", "collect_reservation")
     builder.add_edge("collect_reservation", "respond")
+
+    # Administrator approval workflow
+    builder.add_conditional_edges(
+        "request_admin_approval",
+        route_after_admin_request,
+        {
+            "wait_admin_approval": "wait_admin_approval",
+            "respond": "respond",
+        },
+    )
+
+    # Continue based on administrator decision
+    builder.add_conditional_edges(
+        "wait_admin_approval",
+        route_after_admin_approval,
+        {
+            "write_booking": "write_booking",
+            "respond": "respond",
+        },
+    )
+
+    # Booking and farewell
     builder.add_edge("write_booking", "respond")
     builder.add_edge("farewell", "respond")
 

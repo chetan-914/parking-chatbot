@@ -36,7 +36,6 @@ CREATE FUNCTION free_space_count(
 RETURNS INT
 LANGUAGE sql
 STABLE
-SECURITY DEFINER
 SET search_path = public
 AS $$
     SELECT COUNT(*)::INT
@@ -68,7 +67,6 @@ CREATE FUNCTION make_booking(
 )
 RETURNS UUID
 LANGUAGE plpgsql
-SECURITY DEFINER
 SET search_path = public
 AS $$
 DECLARE
@@ -220,7 +218,6 @@ CREATE FUNCTION cancel_booking(
 )
 RETURNS BOOLEAN
 LANGUAGE plpgsql
-SECURITY DEFINER
 SET search_path = public
 AS $$
 DECLARE

@@ -1,3 +1,4 @@
+
 from typing import Any
 
 
@@ -20,16 +21,8 @@ DYNAMIC_TOPICS = {
 def route_intent(state: dict[str, Any]) -> str | list[str]:
     """
     Route the conversation after intent classification.
-
-    Possible destinations:
-        retrieve_static
-        query_dynamic
-        extract_fields
-        write_booking
-        farewell
-
-    Static and dynamic retrieval can run in parallel.
     """
+
     intent = state.get("intent", "other")
     stage = state.get("stage", "browsing")
     topics = set(state.get("topics", []))
@@ -38,10 +31,10 @@ def route_intent(state: dict[str, Any]) -> str | list[str]:
     if intent == "end_chat":
         return "farewell"
 
-    # 2. Handle confirmation responses only at the confirmation stage.
+    # 2. Customer confirms or declines the reservation quote.
     if stage == "awaiting_confirmation":
         if intent == "confirm_yes":
-            return "write_booking"
+            return "request_admin_approval"
 
         if intent == "confirm_no":
             return "farewell"
@@ -54,7 +47,7 @@ def route_intent(state: dict[str, Any]) -> str | list[str]:
     if intent == "greeting":
         return "retrieve_static"
 
-    # 5. Information request: determine which data stores are needed.
+    # 5. Information request: determine required data stores.
     needs_static = bool(topics & STATIC_TOPICS)
     needs_dynamic = bool(topics & DYNAMIC_TOPICS)
 
@@ -67,17 +60,43 @@ def route_intent(state: dict[str, Any]) -> str | list[str]:
     if needs_dynamic:
         return "query_dynamic"
 
-    # 6. Default to static retrieval for unclear or general questions.
+    # 6. Default to static retrieval.
     return "retrieve_static"
+
+
+def route_after_admin_request(state: dict[str, Any]) -> str:
+    """
+    Route after sending the administrator approval email.
+    """
+
+    status = state.get("admin_approval_status")
+
+    if status == "PENDING":
+        return "wait_admin_approval"
+
+    # If sending failed, inform the customer.
+    return "respond"
+
+
+def route_after_admin_approval(state: dict[str, Any]) -> str:
+    """
+    Route based on the administrator's decision.
+    """
+
+    status = state.get("admin_approval_status")
+
+    if status == "APPROVED":
+        return "write_booking"
+
+    # REJECTED and UNCLEAR must never reach write_booking.
+    return "respond"
 
 
 def route_after_output(state: dict[str, Any]) -> str:
     """
     Decide whether the conversation should continue or finish.
-
-    The graph pauses before human_input for the next user message.
-    Completed conversations are sent to save_transcript.
     """
+
     if state.get("ended", False):
         return "save_transcript"
 

@@ -33,6 +33,8 @@ from app.validators import (
     validate_name,
     validate_period,
 )
+from app.admin_client import send_approval_request
+from app.admin_api import wait_for_admin_decision
 
 logger = logging.getLogger(__name__)
 
@@ -185,6 +187,10 @@ def init(state: dict[str, Any]) -> dict[str, Any]:
         "directive": "",
         "warning": "",
         "booking_ref": "",
+        "admin_request_id": None,
+        "admin_approval_status": "NOT_REQUESTED",
+        "admin_response": None,
+        "admin_reason": None,
         "ended": False,
         "end_reason": "",
         "turn_count": 0,
@@ -765,16 +771,198 @@ def collect_reservation(state: dict[str, Any]) -> dict[str, Any]:
 
 
 # -------------------------------------------------------------------
+# Administrator approval request
+# -------------------------------------------------------------------
+
+def request_admin_approval(state: dict[str, Any]) -> dict[str, Any]:
+    """
+    Send the reservation details to the administrator for approval.
+
+    This node runs only after the customer confirms the quotation.
+    It does not create a booking.
+    """
+
+    reservation = _reservation(state)
+
+    if state.get("admin_approval_status") == "APPROVED":
+        return {
+            "directive": "The administrator has already approved this request."
+        }
+
+    if state.get("admin_approval_status") == "PENDING":
+        return {
+            "directive": "Your reservation request is already awaiting administrator approval."
+        }
+
+    required_fields = (
+        "first_name",
+        "last_name",
+        "car_number",
+        "start",
+        "end",
+    )
+
+    if any(not reservation.get(field) for field in required_fields):
+        return {
+            "admin_approval_status": "UNCLEAR",
+            "directive": (
+                "The reservation details are incomplete. "
+                "Please collect all required details again."
+            ),
+        }
+
+    if state.get("stage") != "awaiting_confirmation":
+        return {
+            "directive": (
+                "The reservation has not been confirmed by the customer. "
+                "Do not send an approval request."
+            )
+        }
+
+    request_id = (
+        state.get("admin_request_id") or str(uuid.uuid4())
+    )
+
+    quote = state.get("quote", {})
+
+    # These details are sent directly to the administrator.
+    # They are not passed to the LLM.
+    reservation_details = {
+        "Customer name": (
+            f"{reservation['first_name']} {reservation['last_name']}"
+        ),
+        "Vehicle registration": reservation["car_number"],
+        "Start time": _format_datetime(reservation["start"]),
+        "End time": _format_datetime(reservation["end"]),
+        "Estimated price": f"₹{quote.get('total_price', 'Not available')}",
+        "Available spaces": quote.get("free_spaces", "Not available"),
+    }
+
+    try:
+        send_approval_request(
+            request_id=request_id,
+            reservation_details=reservation_details,
+        )
+
+        logger.info(
+            "Reservation approval request sent. Request ID: %s",
+            request_id,
+        )
+
+        return {
+            "admin_request_id": request_id,
+            "admin_approval_status": "PENDING",
+            "admin_response": None,
+            "admin_reason": None,
+            "stage": "awaiting_admin_approval",
+            "directive": (
+                "Your reservation request has been sent to the "
+                "administrator for approval. Explain that the booking "
+                "is not confirmed yet and that the customer will be "
+                "informed after the administrator responds."
+            ),
+        }
+
+    except Exception:
+        logger.exception("Could not send administrator approval request")
+
+        return {
+            "admin_request_id": request_id,
+            "admin_approval_status": "UNCLEAR",
+            "stage": "awaiting_confirmation",
+            "directive": (
+                "I could not send your reservation request to the "
+                "administrator. No booking has been created. "
+                "Apologise and ask the customer to try again."
+            ),
+        }
+
+
+def wait_admin_approval(state: dict[str, Any]) -> dict[str, Any]:
+    """
+    Wait for the administrator's email response.
+
+    Booking creation is not performed in this node.
+    """
+
+    request_id = state.get("admin_request_id")
+
+    if not request_id:
+        return {
+            "admin_approval_status": "UNCLEAR",
+            "directive": (
+                "There is no administrator approval request ID. "
+                "The reservation cannot proceed."
+            ),
+        }
+
+    try:
+        decision = wait_for_admin_decision(request_id)
+
+        status = decision.decision
+
+        if status == "APPROVE":
+            return {
+                "admin_approval_status": "APPROVED",
+                "admin_response": "APPROVE",
+                "admin_reason": decision.reason,
+                "stage": "awaiting_admin_booking",
+                "directive": (
+                    "The administrator has approved the reservation. "
+                    "Proceed with the booking operation."
+                ),
+            }
+
+        if status == "REJECT":
+            return {
+                "admin_approval_status": "REJECTED",
+                "admin_response": "REJECT",
+                "admin_reason": decision.reason,
+                "stage": "browsing",
+                "ended": True,
+                "end_reason": "admin_rejected",
+                "directive": (
+                    "The administrator has rejected the reservation. "
+                    "Politely inform the customer that the reservation "
+                    "could not be approved. Do not create a booking."
+                ),
+            }
+
+        return {
+            "admin_approval_status": "UNCLEAR",
+            "admin_response": "UNCLEAR",
+            "admin_reason": decision.reason,
+            "stage": "awaiting_confirmation",
+            "directive": (
+                "The administrator's decision could not be confirmed. "
+                "Inform the customer that the reservation is not confirmed "
+                "and that no booking has been created."
+            ),
+        }
+
+    except Exception:
+        logger.exception("Administrator approval processing failed")
+
+        return {
+            "admin_approval_status": "UNCLEAR",
+            "directive": (
+                "The administrator's response could not be processed. "
+                "No booking has been created."
+            ),
+        }
+    
+
+# -------------------------------------------------------------------
 # Booking write
 # -------------------------------------------------------------------
 
 def write_booking(state: dict[str, Any]) -> dict[str, Any]:
     """Revalidate and write a confirmed booking through PostgreSQL."""
-    if state.get("stage") != "awaiting_confirmation":
+    if state.get("admin_approval_status") != "APPROVED":
         return {
             "directive": (
-                "No booking was made because a confirmed quote "
-                "is not available."
+                "The booking cannot be created because administrator "
+                "approval has not been received."
             )
         }
 
@@ -806,6 +994,7 @@ def write_booking(state: dict[str, Any]) -> dict[str, Any]:
                 f"the quoted total of ₹{state.get('quote', {}).get('total_price')}."
                 " Say goodbye."
             ),
+            "admin_approval_status": "APPROVED",
         }
 
     except ValidationError as exc:
@@ -899,11 +1088,67 @@ def farewell(state: dict[str, Any]) -> dict[str, Any]:
 # -------------------------------------------------------------------
 
 def respond(state: dict[str, Any]) -> dict[str, Any]:
-    """Generate the user-facing response from directives and contexts."""
+    """
+    Generate the user-facing response.
+
+    Reservation confirmation summaries are generated locally
+    so that actual customer PII is never sent to the LLM.
+    """
+
     directive = state.get("directive", "")
     static_context = state.get("static_context", "")
     dynamic_context = state.get("dynamic_context", "")
 
+    # Generate reservation confirmation locally.
+    if (
+        state.get("stage") == "awaiting_confirmation"
+        and state.get("quote")
+    ):
+        reservation = _reservation(state)
+        quote = state.get("quote", {})
+
+        try:
+            start = datetime.fromisoformat(reservation["start"])
+            end = datetime.fromisoformat(reservation["end"])
+
+            full_name = (
+                f"{reservation.get('first_name', '')} "
+                f"{reservation.get('last_name', '')}"
+            ).strip()
+
+            car_number = reservation.get("car_number", "")
+
+            total_price = float(quote["total_price"])
+
+            summary = f"""Please review your parking reservation:
+
+- **Name:** {full_name}
+- **Vehicle:** {car_number}
+- **Date:** {start.strftime("%B %d, %Y")}
+- **Time:** {start.strftime("%I:%M %p").lstrip("0")}–{end.strftime("%I:%M %p").lstrip("0")}
+- **Total:** ₹{total_price:,.2f}
+
+Would you like to confirm or decline?"""
+
+            return {
+                "messages": [AIMessage(content=summary)]
+            }
+
+        except Exception:
+            logger.exception("Could not generate reservation summary")
+
+            return {
+                "messages": [
+                    AIMessage(
+                        content=(
+                            "I couldn't prepare your reservation summary. "
+                            "Please try again."
+                        )
+                    )
+                ]
+            }
+
+    # Normal LLM response for all other conversation turns.
     turn_prompt = build_turn_prompt(
         directive=directive,
         static_context=static_context,
@@ -916,12 +1161,8 @@ def respond(state: dict[str, Any]) -> dict[str, Any]:
         if not isinstance(message, SystemMessage)
     ]
 
-    # Add a masked view of the reservation only when a confirmation
-    # summary is required. The original values must not be passed here.
-    llm = get_llm()
-
     try:
-        response = llm.invoke(
+        response = get_llm().invoke(
             messages + [SystemMessage(content=turn_prompt)]
         )
 
@@ -947,7 +1188,11 @@ def respond(state: dict[str, Any]) -> dict[str, Any]:
 # -------------------------------------------------------------------
 
 def pii_check_output(state: dict[str, Any]) -> dict[str, Any]:
-    """Redact sensitive information from the generated assistant response."""
+    """
+    Protect assistant output while allowing the customer's own
+    reservation details to be displayed.
+    """
+
     message = _last_message(state, AIMessage)
 
     if message is None:
@@ -964,12 +1209,21 @@ def pii_check_output(state: dict[str, Any]) -> dict[str, Any]:
     }
 
     try:
-        masked = mask_text(str(message.content))
+        # Explicitly provide known reservation PII to the masker.
+        masked = mask_text(
+            str(message.content),
+            known_names=[
+                reservation.get("first_name", ""),
+                reservation.get("last_name", ""),
+            ],
+            known_car_numbers=[
+                reservation.get("car_number", ""),
+            ],
+        )
 
-        # The assistant may repeat only the current user's own
-        # reservation details. Other detected PII remains masked.
         safe_text = masked.text
 
+        # Restore only the current customer's own reservation details.
         for placeholder, original in masked.replacements.items():
             if original in allowed_values:
                 safe_text = safe_text.replace(placeholder, original)
@@ -997,12 +1251,14 @@ def pii_check_output(state: dict[str, Any]) -> dict[str, Any]:
                 AIMessage(
                     content=(
                         "I couldn't safely prepare that response. "
-                        "Please rephrase your request."
+                        "Please try again."
                     ),
                     id=message.id,
                 )
             ],
-            "warning": "The privacy filter blocked part of the response.",
+            "warning": (
+                "The privacy filter blocked part of the response."
+            ),
         }
 
 

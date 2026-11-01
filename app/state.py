@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Literal
 
 from langgraph.graph import MessagesState
 
@@ -54,3 +54,16 @@ class ParkingState(MessagesState):
 
     # Number of user turns
     turn_count: int
+
+    # Administrator approval workflow
+    admin_request_id: str | None
+    admin_approval_status: Literal[
+        "NOT_REQUESTED",
+        "PENDING",
+        "APPROVED",
+        "REJECTED",
+        "UNCLEAR",
+    ]
+
+    admin_response: str | None
+    admin_reason: str | None

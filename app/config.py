@@ -79,6 +79,28 @@ class Settings(BaseSettings):
         alias="LOG_LEVEL",
     )
 
+    # Administrator email configuration
+    admin_email_from: str = ""
+    admin_email_to: str = ""
+
+    # SMTP: sending approval requests
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_username: str = ""
+    smtp_password: str = ""
+    smtp_use_ssl: bool = False
+    smtp_starttls: bool = True
+
+    # IMAP: receiving administrator replies
+    imap_host: str = ""
+    imap_port: int = 993
+    imap_username: str = ""
+    imap_password: str = ""
+    imap_use_ssl: bool = True
+
+    # How frequently to check for administrator replies
+    admin_email_poll_interval: int = 30
+
     @property
     def openai_key(self) -> str:
         return self.openai_api_key.get_secret_value()
