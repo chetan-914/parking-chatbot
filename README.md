@@ -294,12 +294,6 @@ Add screenshots here as the application is executed and tested.
 
 ![PII Protection](screenshots/pii-protection.png)
 
-### 6.9 Evaluation Results
-
-<!-- TODO: Add screenshot showing evaluation output and metrics -->
-
-![Evaluation Results](screenshots/evaluation-results.png)
-
 ---
 
 ## 7. Sample Test Scenarios
