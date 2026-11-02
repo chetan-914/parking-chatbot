@@ -1,0 +1,23 @@
+question_id,question,latency_ms,is_warmup
+1,How do I reserve a parking space?,9154.1,True
+2,What information is required for a reservation?,4965.56,True
+3,Can I cancel my reservation?,4509.78,True
+4,Where is the parking facility located?,5111.96,False
+5,What facilities are available?,4953.49,False
+6,Do you provide electric vehicle charging?,4197.12,False
+8,What are the vehicle rules?,5148.59,False
+9,How can I contact support?,5203.41,False
+10,What payment methods are accepted?,4626.37,False
+11,What are the parking hours?,3038.79,False
+12,What is the price per hour?,2966.25,False
+13,Is parking available today?,4017.55,False
+14,How many spaces are currently free?,3581.76,False
+15,Can I book a space for tomorrow?,7442.76,False
+16,What is the maximum booking duration?,5017.71,False
+17,Can I book for two hours?,5219.21,False
+18,Can I reserve a space in advance?,4932.01,False
+19,What happens if all spaces are occupied?,4799.53,False
+20,How does the booking confirmation work?,5006.75,False
+21,How do I reserve a parking space?,5746.78,False
+22,What information is required for a reservation?,4687.89,False
+23,Can I cancel my reservation?,5383.55,False

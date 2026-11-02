@@ -107,11 +107,10 @@ def evaluate_question(record, k_values, topic_filter):
     results = search_static(
         query=question,
         k=max(k_values),
-        topic=topic,
     )
 
     retrieved = [
-        result["chunk_id"]
+        result["chunk_index"]
         for result in results
     ]
 

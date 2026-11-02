@@ -1,0 +1,41 @@
+id,question,relevant_chunk_ids,retrieved_chunk_ids,is_out_of_scope,recall@1,precision@1,hit_rate@1,recall@3,precision@3,hit_rate@3,recall@5,precision@5,hit_rate@5,mrr
+r001,What is this parking facility and how many spaces does it have?,['overview'],"[1, 0, 0, 1, 0]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r002,Who can use the parking facility?,['overview'],"[1, 1, 1, 1, 0]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r003,Is this a public parking facility?,['overview'],"[1, 0, 0, 0, 1]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r004,Where is the parking entrance?,"['directions_road', 'location']","[1, 1, 0, 1, 0]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r005,Can you give me the address and nearby landmarks?,['location'],"[0, 1, 0, 1, 0]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r006,How do I drive into the parking area?,['directions_road'],"[1, 0, 1, 1, 1]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r007,Which road should I take to reach the entrance?,['directions_road'],"[0, 1, 1, 0, 1]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r008,Can I reach the parking by bus or metro?,['directions_transit'],"[1, 1, 0, 1, 0]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r009,What public transport options are nearby?,['directions_transit'],"[0, 1, 1, 0, 0]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r010,How far do I walk from the transit stop?,['directions_transit'],"[0, 1, 1, 0, 0]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r011,How can I reserve a parking space in the chat?,['how_to_book'],"[0, 1, 0, 0, 0]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r012,What information do I need to provide to make a booking?,['how_to_book'],"[1, 0, 1, 0, 1]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r013,Can I book a space for tomorrow?,['how_to_book'],"[1, 0, 1, 0, 0]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r014,Can I cancel a reservation after making it?,['cancellation_policy'],"[0, 1, 1, 0, 1]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r015,What is the cancellation process?,['cancellation_policy'],"[0, 1, 0, 1, 0]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r016,Are there any restrictions on when I can cancel?,['cancellation_policy'],"[1, 0, 1, 1, 1]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r017,Are SUVs or large vehicles allowed?,['vehicle_rules'],"[1, 0, 1, 1, 0]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r018,Is there a vehicle height restriction?,['vehicle_rules'],"[0, 1, 1, 0, 1]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r019,What are the driving and speed rules inside the facility?,['vehicle_rules'],"[1, 0, 1, 1, 0]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r020,Does the parking facility have electric vehicle charging?,['ev_charging'],"[0, 1, 1, 1, 0]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r021,How do I use the EV charging points?,['ev_charging'],"[1, 0, 1, 1, 0]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r022,Can I charge my electric car while it is parked?,['ev_charging'],"[0, 1, 1, 1, 1]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r023,What payment methods are accepted?,['payment_methods'],"[0, 1, 1, 1, 0]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r024,When do I pay for my parking reservation?,['payment_methods'],"[0, 1, 1, 1, 0]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r025,Can I pay digitally or by card?,['payment_methods'],"[0, 1, 1, 0, 1]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r026,Is the parking area monitored by cameras?,['security'],"[0, 1, 0, 1, 1]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r027,Is the parking facility well lit and staffed?,['security'],"[0, 1, 1, 1, 0]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r028,What security measures are available for parked vehicles?,['security'],"[0, 1, 1, 0, 1]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r029,Are accessible parking spaces available?,['accessibility'],"[0, 1, 1, 0, 1]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r030,Can a wheelchair user access the parking facility?,['accessibility'],"[0, 1, 1, 1, 1]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r031,Are ramps or lifts available?,['accessibility'],"[0, 1, 1, 1, 0]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r032,How can I contact a human support representative?,['contact_support'],"[1, 0, 1, 0, 1]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r033,Where can I get help with a reservation problem?,['contact_support'],"[1, 0, 1, 0, 0]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r034,Is there a support phone number or email?,['contact_support'],"[1, 0, 1, 0, 1]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r035,I have an electric car. How do I reserve a space and use charging?,"['ev_charging', 'how_to_book']","[0, 1, 0, 1, 1]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r036,I need to cancel my booking. What policy applies and how do I contact support?,"['cancellation_policy', 'contact_support']","[0, 1, 0, 1, 1]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r037,"How do I find the entrance, and can I get there using public transport?","['directions_road', 'directions_transit']","[1, 0, 1, 1, 0]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r038,Are accessible spaces monitored by security cameras?,"['accessibility', 'security']","[0, 1, 0, 1, 0]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r039,"Can I pay by card, and when is payment collected?",['payment_methods'],"[0, 1, 1, 0, 0]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+r040,What vehicle restrictions should I know before booking?,"['how_to_book', 'vehicle_rules']","[1, 1, 0, 0, 1]",False,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
