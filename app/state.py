@@ -1,4 +1,5 @@
 from typing import Any, Literal
+from datetime import datetime
 
 from langgraph.graph import MessagesState
 
@@ -67,3 +68,5 @@ class ParkingState(MessagesState):
 
     admin_response: str | None
     admin_reason: str | None
+    admin_approved_at: datetime | None
+    mcp_storage_status: str

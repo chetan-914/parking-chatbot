@@ -35,6 +35,7 @@ from app.validators import (
 )
 from app.admin_client import send_approval_request
 from app.admin_api import wait_for_admin_decision
+from app.mcp_client import save_reservation_sync
 
 logger = logging.getLogger(__name__)
 
@@ -191,6 +192,7 @@ def init(state: dict[str, Any]) -> dict[str, Any]:
         "admin_approval_status": "NOT_REQUESTED",
         "admin_response": None,
         "admin_reason": None,
+        "admin_approved_at": None,
         "ended": False,
         "end_reason": "",
         "turn_count": 0,
@@ -506,7 +508,7 @@ def extract_fields(state: dict[str, Any]) -> dict[str, Any]:
                     "Do not guess missing information."
                 )
             ),
-            HumanMessage(content=str(message.content)),
+            *state.get("messages", []),
         ])
 
         values = _restore_extracted_fields(result, replacements)
@@ -911,6 +913,9 @@ def wait_admin_approval(state: dict[str, Any]) -> dict[str, Any]:
                     "The administrator has approved the reservation. "
                     "Proceed with the booking operation."
                 ),
+                "admin_approved_at": datetime.now().astimezone().isoformat(
+                    timespec="seconds"
+                ),
             }
 
         if status == "REJECT":
@@ -957,7 +962,11 @@ def wait_admin_approval(state: dict[str, Any]) -> dict[str, Any]:
 # -------------------------------------------------------------------
 
 def write_booking(state: dict[str, Any]) -> dict[str, Any]:
-    """Revalidate and write a confirmed booking through PostgreSQL."""
+    """
+    Create an administrator-approved booking in PostgreSQL
+    and save its details through the MCP server.
+    """
+
     if state.get("admin_approval_status") != "APPROVED":
         return {
             "directive": (
@@ -967,6 +976,15 @@ def write_booking(state: dict[str, Any]) -> dict[str, Any]:
         }
 
     reservation = _reservation(state)
+    request_id = state.get("admin_request_id")
+
+    if not request_id:
+        return {
+            "directive": (
+                "The administrator approval request ID is missing. "
+                "The booking cannot proceed."
+            )
+        }
 
     try:
         start = datetime.fromisoformat(reservation["start"])
@@ -974,27 +992,97 @@ def write_booking(state: dict[str, Any]) -> dict[str, Any]:
 
         validate_period(start, end)
 
-        booking_ref = make_booking(
-            first_name=reservation["first_name"],
-            last_name=reservation["last_name"],
-            car_number=reservation["car_number"],
-            start=start,
-            end=end,
-            conversation_id=state["conversation_id"],
+        # Reuse an existing booking reference if this node is resumed.
+        # This prevents creating another PostgreSQL booking if MCP
+        # storage previously failed.
+        booking_ref = state.get("booking_ref")
+
+        if not booking_ref:
+            booking_ref = make_booking(
+                first_name=reservation["first_name"],
+                last_name=reservation["last_name"],
+                car_number=reservation["car_number"],
+                start=start,
+                end=end,
+                conversation_id=state["conversation_id"],
+            )
+
+        # Use the recorded administrator approval time when available.
+        approval_time = state.get("admin_approved_at")
+
+        if not approval_time:
+            approval_time = datetime.now().astimezone().isoformat(
+                timespec="seconds"
+            )
+
+        elif isinstance(approval_time, datetime):
+            approval_time = approval_time.isoformat(timespec="seconds")
+
+        # Format the reservation period for the text file.
+        reservation_period = (
+            f"{start:%d-%m-%Y %H:%M} - "
+            f"{end:%d-%m-%Y %H:%M}"
         )
+
+        # Save the confirmed reservation using the MCP server.
+        try:
+            mcp_result = save_reservation_sync(
+                request_id=request_id,
+                name=(
+                    f"{reservation['first_name']} "
+                    f"{reservation['last_name']}"
+                ),
+                car_number=reservation["car_number"],
+                reservation_period=reservation_period,
+                approval_time=approval_time,
+            )
+
+            logger.info(
+                "Reservation saved through MCP: %s",
+                mcp_result,
+            )
+
+            storage_status = "SAVED"
+
+        except Exception:
+            logger.exception(
+                "PostgreSQL booking succeeded but MCP storage failed. "
+                "Booking reference: %s",
+                booking_ref,
+            )
+
+            # PostgreSQL booking already exists. Do not create another one.
+            return {
+                "booking_ref": booking_ref,
+                "admin_approval_status": "APPROVED",
+                "mcp_storage_status": "FAILED",
+                "admin_request_id": request_id,
+                "ended": True,
+                "end_reason": "booked_storage_pending",
+                "stage": "browsing",
+                "directive": (
+                    "Your reservation has been successfully confirmed "
+                    "in the booking system. However, the reservation "
+                    "could not be copied to the secondary file storage. "
+                    f"Your booking reference is {booking_ref}. "
+                    "Do not tell the customer that the booking failed."
+                ),
+            }
 
         return {
             "booking_ref": booking_ref,
+            "admin_approval_status": "APPROVED",
+            "mcp_storage_status": storage_status,
             "ended": True,
             "end_reason": "booked",
             "stage": "browsing",
             "directive": (
-                "The booking was successful. Confirm the reservation, "
-                f"provide booking reference {booking_ref}, and mention "
-                f"the quoted total of ₹{state.get('quote', {}).get('total_price')}."
-                " Say goodbye."
+                "The booking was successful and saved to the reservation "
+                "file. Confirm the reservation, provide booking reference "
+                f"{booking_ref}, and mention the quoted total of "
+                f"₹{state.get('quote', {}).get('total_price')}. "
+                "Say goodbye."
             ),
-            "admin_approval_status": "APPROVED",
         }
 
     except ValidationError as exc:
@@ -1041,6 +1129,7 @@ def write_booking(state: dict[str, Any]) -> dict[str, Any]:
             }
 
         logger.exception("Booking failed")
+
         return {
             "directive": (
                 "I could not complete the booking. No confirmation "

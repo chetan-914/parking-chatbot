@@ -20,6 +20,7 @@ The Parking Space Reservation Chatbot allows users to:
 - Create bookings only after administrator approval.
 - Handle invalid booking requests and unavailable parking spaces.
 - Protect personally identifiable information (PII) before sending data to an LLM.
+- Save administrator-approved reservation details to a text file using an MCP server.
 
 The application uses **LangGraph** to manage conversational state and workflow execution.
 
@@ -52,6 +53,10 @@ The two agents communicate through an email-based approval workflow using SMTP a
 | Email Integration | SMTP and IMAP |
 | Email Interpretation | LangChain structured output |
 | Containerization | Docker Compose |
+| MCP Framework | Official Python MCP SDK |
+| MCP Communication | STDIO transport |
+| MCP Client | MCP Python Client |
+| Reservation File Storage | Local text file with JSONL journal |
 
 ---
 
@@ -137,6 +142,9 @@ The application follows a multi-agent, workflow-based architecture.
                              v                           v
                        PostgreSQL                  Customer Agent
                        Booking Write                     |
+                        MCP Client                       |
+                        MCP server                       |
+                  approved_reservations.txt              |
                              |                           |
                              +-------------+-------------+
                                            |
@@ -308,14 +316,20 @@ parking-chatbot/
 │   ├── retrieval.py
 │   ├── validators.py
 │   ├── guardrails.py
-│   │
 │   ├── admin_agent.py
 │   ├── admin_client.py
 │   ├── admin_api.py
-│   │
+│   ├── mcp_client.py
 │   ├── nodes.py
 │   ├── routers.py
 │   └── graph.py
+│
+├── data/
+│   ├── approved_reservations.txt
+│   ├── .reservation_journal.jsonl
+│   └── .reservations.lock
+│
+├── mcp_server.py
 │
 ├── cli.py
 │
@@ -358,6 +372,8 @@ parking-chatbot/
 | `routers.py` | Intent-based and approval-based routing |
 | `graph.py` | LangGraph workflow construction |
 | `cli.py` | Command-line chatbot interface |
+| `mcp_client.py` | Connects the customer agent to the MCP server and invokes reservation storage tools |
+| `mcp_server.py` | Provides the MCP tool for securely saving administrator-approved reservations |
 
 ---
 
@@ -370,6 +386,9 @@ parking-chatbot/
 - Python project configuration using `pyproject.toml`.
 - Dependency management using `uv`.
 - PostgreSQL and Weaviate infrastructure.
+- MCP server implemented using the official Python MCP SDK.
+- Local MCP server communication using STDIO transport.
+- MCP client integration with the existing LangGraph workflow.
 
 ### 5.2 Database Implementation
 
@@ -412,6 +431,10 @@ The workflow includes:
 - Booking creation.
 - Response generation.
 - Transcript persistence.
+- Verify administrator approval before booking creation.
+- Invoke the MCP client after successful PostgreSQL booking.
+- Save approved reservation details through the MCP server.
+- Return the final booking status to the customer.
 
 ### 5.5 Administrator Agent and LangChain
 
@@ -473,6 +496,27 @@ The application includes an enhanced PII protection approach:
 Reservation details are sent through email to the configured administrator mailbox for approval. This is a separate communication channel from LLM processing.
 
 Email credentials must be stored in environment variables and must never be committed to source control.
+
+The application uses a local MCP server to store administrator-approved
+reservation details.
+
+Security and reliability measures include:
+
+- STDIO transport to communicate with the locally running MCP server.
+- No publicly exposed HTTP endpoint for reservation file operations.
+- Input validation for customer names, vehicle registration numbers,
+  reservation periods and approval timestamps.
+- Unique reservation request IDs to prevent duplicate file entries.
+- File locking using Linux `fcntl` to protect concurrent writes.
+- A JSONL journal to maintain a durable record of processed reservations.
+- Atomic file replacement to reduce the risk of partially written files.
+- Internal error logging without exposing storage details to customers.
+
+The MCP storage tool is invoked by the customer agent only after the
+administrator approval workflow has returned an explicit APPROVED decision.
+
+The storage directory should be restricted to the application service
+account using operating-system file permissions.
 
 ### 5.8 Reservation Business Rules
 
@@ -681,6 +725,12 @@ The following scenarios can be used to test the chatbot.
 | Administrator does not respond | Keep the reservation unconfirmed |
 | Duplicate administrator response | Ensure the same request is not booked twice |
 | PII and prompt injection | Protect sensitive information and reject unsafe instructions |
+| Administrator-approved reservation | Create booking in PostgreSQL and save reservation through MCP |
+| MCP server successfully writes reservation | Add reservation details to approved_reservations.txt |
+| Duplicate MCP request ID | Prevent duplicate reservation file entries |
+| Concurrent MCP write requests | Protect file operations using file locking |
+| Invalid MCP reservation data | Reject invalid input without writing a record |
+| MCP server unavailable | Report the storage operation failure |
 
 Additional testing should cover cancellation, concurrent reservations, booking boundaries, retrieval quality, email delivery failures, and administrator response handling.
 
@@ -749,3 +799,11 @@ The two-agent architecture separates customer interaction from administrator dec
 The customer-facing agent manages reservation collection and validation, while the administrator agent handles email-based approval and rejection decisions.
 
 This ensures that reservation creation is subject to human administrator approval rather than being performed automatically based only on customer confirmation.
+
+The application also integrates a local MCP server for reservation storage.
+After administrator approval and successful PostgreSQL booking, the customer
+agent invokes the MCP storage tool to write the reservation details to a
+text file.
+
+The MCP server uses STDIO communication, input validation, file locking,
+duplicate prevention and a durable journal to improve storage reliability.
