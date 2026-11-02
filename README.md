@@ -581,82 +581,41 @@ The same mailbox can be used for sending and receiving administrator approval me
 Add screenshots here as the application is executed and tested.
 
 ### 7.1 Docker Services
-
-<!-- TODO: Add screenshot showing running Docker containers -->
-
 ![Docker Services](screenshots/docker-services.png)
 
 ### 7.2 PostgreSQL Database
-
-<!-- TODO: Add screenshot showing database tables and sample records -->
-
 ![PostgreSQL Database](screenshots/postgresql-database.png)
 
 ### 7.3 Weaviate Collection
-
-<!-- TODO: Add screenshot showing the Weaviate collection and ingested objects -->
-
 ![Weaviate Collection](screenshots/weaviate-collection.png)
 
 ### 7.4 Chatbot Startup
-
-<!-- TODO: Add screenshot showing chatbot startup in the terminal -->
-
 ![Chatbot Startup](screenshots/chatbot-startup.png)
 
 ### 7.5 Parking Information Retrieval
-
-<!-- TODO: Add screenshot showing a parking information question and response -->
-
 ![Information Retrieval](screenshots/information-retrieval.png)
 
 ### 7.6 Customer Reservation Request
-
-<!-- TODO: Add screenshot showing customer reservation details and quotation -->
-
 ![Customer Reservation](screenshots/customer-reservation.png)
 
 ### 7.7 Administrator Approval Email
-
-<!-- TODO: Add screenshot showing an approval request email -->
-
 ![Administrator Approval Email](screenshots/admin-approval-email.png)
 
 ### 7.8 Administrator Approval Response
-
-<!-- TODO: Add screenshot showing administrator approval or rejection email -->
-
 ![Administrator Response](screenshots/admin-response.png)
 
 ### 7.9 Successful Administrator Approval
-
-<!-- TODO: Add screenshot showing approved reservation and booking reference -->
-
 ![Approved Reservation](screenshots/approved-reservation.png)
 
 ### 7.10 Administrator Rejection
-
-<!-- TODO: Add screenshot showing rejected reservation -->
-
 ![Rejected Reservation](screenshots/rejected-reservation.png)
 
 ### 7.11 Invalid Reservation Handling
-
-<!-- TODO: Add screenshot showing validation of invalid booking details -->
-
 ![Invalid Reservation](screenshots/invalid-reservation.png)
 
 ### 7.12 PII Protection
-
-<!-- TODO: Add screenshot showing sensitive information being masked -->
-
 ![PII Protection](screenshots/pii-protection.png)
 
-### 7.13 Evaluation Results
-
-<!-- TODO: Add screenshot showing evaluation output and metrics -->
-
-![Evaluation Results](screenshots/evaluation-results.png)
 
 ---
 

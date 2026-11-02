@@ -506,7 +506,7 @@ def extract_fields(state: dict[str, Any]) -> dict[str, Any]:
                     "Do not guess missing information."
                 )
             ),
-            HumanMessage(content=str(message.content)),
+            *state.get("messages", []),
         ])
 
         values = _restore_extracted_fields(result, replacements)
