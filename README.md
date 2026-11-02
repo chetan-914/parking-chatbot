@@ -696,11 +696,6 @@ Add screenshots here as the application is executed and tested.
 
 ![PII Protection](screenshots/pii-protection.png)
 
-### 7.13 Evaluation Results
-
-<!-- TODO: Add screenshot showing evaluation output and metrics -->
-
-![Evaluation Results](screenshots/evaluation-results.png)
 
 ---
 
